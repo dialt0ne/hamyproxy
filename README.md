@@ -1,6 +1,9 @@
 hamyproxy Cookbook
 =====================
-This cookbook configures haproxy for mysql connections
+This cookbook configures haproxy for mysql connections.
+It also contains a companion script that will reload haproxy when the IP address of a DNS name changes.
+
+![mmmm... hamy](https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Schinken.jpg/300px-Schinken.jpg)
 
 Requirements
 ------------
@@ -11,7 +14,6 @@ Requirements
 Attributes
 ----------
 
-e.g.
 #### hamyproxy::default
 <table>
   <tr>
@@ -30,7 +32,7 @@ e.g.
     <td><tt>['hamyproxy']['servers']</tt></td>
     <td>Hash</td>
     <td>Key/value pairs of serverid and servername (DNS name)</td>
-    <td><tt>{}</tt></td>
+    <td><tt>None</tt></td>
   </tr>
 </table>
 
