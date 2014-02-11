@@ -37,7 +37,7 @@ Attributes
   <tr>
     <td><tt>['hamyproxy']['splaytime']</tt></td>
     <td>Int</td>
-    <td>Upper boundary of the random number of seconds to sleep before restart</td>
+    <td>Upper boundary of the random number of seconds to sleep before reload</td>
     <td><tt>30</tt></td>
   </tr>
 </table>
