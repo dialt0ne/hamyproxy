@@ -18,13 +18,16 @@ import argparse
 import logging
 import logging.handlers
 import os
+from random import randint
 import socket
 from subprocess import call
+from time import sleep
 
 progname = "hamyproxy-test"
 progdescr = "test if IP addresses have changed"
 loglevel = logging.INFO
 
+splay = <%= @splayTime %>
 stateDirectory = "<%= @stateDirectory %>"
 servers = [
 <% @serverNames.each do |serverId, serverName| %>
@@ -119,6 +122,9 @@ if __name__ == '__main__':
                     serverName, oldIp, currentIp,
                 )
     if restartHaproxy is not False:
+        sleepTime = randint(0, splay)
+        logging.info("sleeping %d before restart", sleepTime)
+        sleep(sleepTime)
         logging.info("restarting haproxy")
         call(["/etc/init.d/haproxy", "reload"])
     else:
