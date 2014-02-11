@@ -6,6 +6,7 @@ Requirements
 ------------
 #### packages
 - `haproxy` - hamyproxy needs haproxy to proxy connections
+- `cron` - hamyproxy needs cron to schedule tests of IP changes
 
 Attributes
 ----------
@@ -35,6 +36,12 @@ e.g.
 
 Usage
 -----
+Insure that the user `haproxy_check` exists in the mysql master database. To create it:
+
+```
+mysql -u root -p -e "INSERT INTO mysql.user (Host,User) values ('%','haproxy_check'); FLUSH PRIVILEGES;"
+```
+
 #### hamyproxy::default
 
 Include `hamyproxy` in your node's `run_list` and set the servers attribute:
@@ -53,6 +60,10 @@ Include `hamyproxy` in your node's `run_list` and set the servers attribute:
   }
 }
 ```
+
+Thanks
+------
+This cookbook is based on the excellent [How To](https://www.digitalocean.com/community/articles/how-to-use-haproxy-to-set-up-mysql-load-balancing--3) provided by Jesin and DigitalOcean
 
 Contributing
 ------------
