@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+import argparse
+import logging
+import logging.handlers
+import os
+import socket
+from subprocess import call
+
+progname = "hamyproxy-test"
+progdescr = "test if IP addresses have changed"
+loglevel = logging.INFO
+
+stateDirectory = "<%= @stateDirectory %>"
+servers = [
+<% @serverNames.each do |serverId, serverName| %>
+    "<%= serverName %>",
+<% end %>
+]
+
+
+# fix python brokenness in CentOS/RHEL/Amazon Linux
+# http://serverfault.com/a/408491/22362
+class myFormatter(logging.Formatter):
+    def format(self, record):
+        return logging.Formatter.format(self, record).encode('utf-8')
+
+
+def getOldIpaddress(serverId, stateDirectory):
+    fileName = stateDirectory + "/" + str(serverId)
+    oldIpaddress = "none"
+    try:
+        with open(fileName, "r") as f:
+            oldIpaddress = f.readline()
+            f.close()
+    except:
+        logging.error("could not open file '%s' for read", fileName)
+    return oldIpaddress
+
+
+def getCurrentIpaddress(serverName):
+    currentIpaddress = "unknown"
+    try:
+        currentIpaddress = socket.gethostbyname(serverName)
+    except:
+        logging.error("could not get IP address for hostname '%s'", serverName)
+    return currentIpaddress
+
+
+def writeCurrentIpaddress(currentIpaddress, serverId, stateDirectory):
+    fileName = stateDirectory + "/" + str(serverId)
+    try:
+        with open(fileName, "w") as f:
+            f.write(str(currentIpaddress))
+            f.close()
+            return True
+    except:
+        logging.error("could not open file '%s' for write", fileName)
+        return False
+
+
+if __name__ == '__main__':
+    # root logger
+    logging.basicConfig(level=logging.DEBUG, filename='/dev/null')
+    # setup arguments
+    parser = argparse.ArgumentParser(
+        prog=progname,
+        description=progdescr,
+    )
+    parser.add_argument(
+        "-D", "--debug",
+        help="output at debug level",
+        action="store_true"
+    )
+    args = parser.parse_args()
+    # set log level for our messages
+    if args.debug:
+        loglevel = logging.DEBUG
+    # create a syslog handler
+    syslogLogger = logging.handlers.SysLogHandler(address='/dev/log')
+    syslogLogger.setLevel(loglevel)
+    syslogLogger.setFormatter(myFormatter(
+        progname + ": %(levelname)s %(message)s"))
+    logging.getLogger('').addHandler(syslogLogger)
+    # by default, don't restart
+    restartHaproxy = False
+    # give up if the state directory isn't there
+    if not os.path.exists(stateDirectory):
+        logging.error("directory '%s' does not exist", stateDirectory)
+    else:
+        for serverName in servers:
+            oldIp = getOldIpaddress(serverName, stateDirectory)
+            currentIp = getCurrentIpaddress(serverName)
+            if currentIp != oldIp:
+                logging.info(
+                    "flagging haproxy to restart - "
+                    "serverName '%s' oldIp '%s' currentIp '%s'",
+                    serverName, oldIp, currentIp,
+                )
+                restartHaproxy = True
+                writeCurrentIpaddress(currentIp, serverName, stateDirectory)
+            else:
+                logging.debug(
+                    "serverName '%s' oldIp '%s' currentIp '%s'",
+                    serverName, oldIp, currentIp,
+                )
+    if restartHaproxy is not False:
+        logging.info("restarting haproxy")
+        call(["/etc/init.d/haproxy", "reload"])
+    else:
+        logging.debug("haproxy not restarted")
