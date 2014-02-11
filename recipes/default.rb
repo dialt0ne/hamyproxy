@@ -61,6 +61,7 @@ template "#{node['hamyproxy']['basedir']}/bin/hamyproxy-test" do
     variables ({
         :stateDirectory => "#{node['hamyproxy']['basedir']}/state",
         :serverNames => node['hamyproxy']['servers'],
+        :splayTime => node['hamyproxy']['splaytime'],
     })
     action :create
 end

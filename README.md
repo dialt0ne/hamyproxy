@@ -34,6 +34,12 @@ Attributes
     <td>Key/value pairs of serverid and servername (DNS name)</td>
     <td><tt>None</tt></td>
   </tr>
+  <tr>
+    <td><tt>['hamyproxy']['splaytime']</tt></td>
+    <td>Int</td>
+    <td>Upper boundary of the random number of seconds to sleep before restart</td>
+    <td><tt>30</tt></td>
+  </tr>
 </table>
 
 Usage
